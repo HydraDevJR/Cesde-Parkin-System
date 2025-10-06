@@ -7,7 +7,7 @@ public class CesdePS {
 
     public static void main(String[] args) {
         // Crear instancias de los controles
-        Parqueadero parqueadero = new Parqueadero(5); // 5 espacios de ejemplo
+        Parqueadero parqueadero = new Parqueadero(3); // 3 espacios de ejemplo
         UsuarioControl uControl = new UsuarioControl();
         VehiculoControl vControl = new VehiculoControl(uControl);
         OcupacionControl oControl = new OcupacionControl();

@@ -8,7 +8,22 @@ let contrasena = document.getElementById("contrasena");
 let rol = document.getElementById("rol");
 
 Crear.addEventListener("click", () => {
-    agregarUsuario(cedula.value, nombre.value, correo.value, rol.value);
+    if (cedula.value != "" && nombre.value != "" && correo.value != "" && contrasena.value != "" && rol.value != "") {
+        const Usuarios = JSON.parse(localStorage.getItem("Usuarios")) || [];
+        Usuarios.push({cedula: cedula.value, nombre: nombre.value, correo: correo.value, contrasena: contrasena.value, rol: rol.value});
+        localStorage.setItem("Usuarios", JSON.stringify(Usuarios));
+
+        agregarUsuario(cedula.value, nombre.value, correo.value, rol.value);
+
+        cedula.value = "";
+        nombre.value = "";
+        correo.value = "";
+        contrasena.value = "";
+        rol.value = "";
+        
+    }else{
+        alert("Todos los campos son obligatorios");
+    }
 });
 
 function agregarUsuario(cedula, nombre, correo, rol) {
@@ -39,6 +54,13 @@ function agregarUsuario(cedula, nombre, correo, rol) {
     iconEliminar.classList.add("icon","bi","bi-trash");
     iconEliminar.addEventListener("click", () => {
         divUsuario.remove();
+        const Usuarios = JSON.parse(localStorage.getItem("Usuarios")) || [];
+        for (let i = 0; i < Usuarios.length; i++) {
+            if (Usuarios[i].cedula == cedula) {
+                Usuarios.splice(i, 1);
+                localStorage.setItem("Usuarios", JSON.stringify(Usuarios));
+            }
+        }
     });
 
     let contP = document.createElement("div");

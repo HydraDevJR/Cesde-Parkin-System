@@ -56,7 +56,7 @@ body{
         font-size: 1.8rem;
         font-weight: 800;
     }
-    .inputs{
+    #inputs{
         width: 100%;
         display: flex;
         flex-direction: column;
@@ -79,18 +79,15 @@ body{
         box-shadow: 1px 1px 10px #3399ff;
         transform: scale(1.03);
     }
-    section .login .inputs input{
+    section .login #inputs input{
         background-color: var(--blanco);
         width: 70%;
         height: 100%;
         outline: none;
         border: none;
     }
-    a{
-        width: 60%;
-    }
     .input03{
-        width: 100%;
+        width: 60%;
         height: 40px;
         color: #ffffff;
         background-color: var(--rosado);

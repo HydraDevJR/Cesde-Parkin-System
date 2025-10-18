@@ -104,6 +104,7 @@ nav{
 .item{
     list-style: none;
     text-align: center;
+    cursor: pointer;
 }
 main{
     width: 85%;

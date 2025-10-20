@@ -8,17 +8,17 @@ import java.util.ArrayList;
 public class Usuario {
 
     //Atributos principales de la clase Usuario
-    private int id_usuario;
+    private int documento;
     private String nombre;
     private String correo;
     private String contrasena;
     private String rol;
     private LocalDateTime fecha_creacion;
-    private ArrayList<Vehiculo> vehiculos;
+    private final ArrayList<Vehiculo> vehiculos;
 
     //Constructor para crear un usuario con fecha de creación automática
     public Usuario(int id_Usuario, String nombre, String correo, String contrasena, String rol) {
-        this.id_usuario = id_Usuario;
+        this.documento = id_Usuario;
         this.nombre = nombre;
         this.correo = correo;
         this.contrasena = contrasena;
@@ -29,11 +29,11 @@ public class Usuario {
 
     //Getters y Setters de los atributos
     public int getId_usuario() {
-        return id_usuario;
+        return documento;
     }
 
     public void setId_usuario(int id_usuario) {
-        this.id_usuario = id_usuario;
+        this.documento = id_usuario;
     }
 
     public String getNombre() {
@@ -80,7 +80,7 @@ public class Usuario {
     public int getVehiculos() {
         int contador = 0;
         for (Vehiculo v : vehiculos) {
-            if (v.getId_usuario() == this.id_usuario) {
+            if (v.getId_usuario() == this.documento) {
                 contador++;
             }
         }
@@ -90,7 +90,7 @@ public class Usuario {
     //Metodo para agregar un vehiculo al usuario
     //  solo si el vehiculo pertenece a este usuario y no existe previamente
     public void agregarVehiculo(Vehiculo v) {
-        if (v.getId_usuario() == this.id_usuario && buscarVehiculoPorPlaca(v.getPlaca()) == null) {
+        if (v.getId_usuario() == this.documento && buscarVehiculoPorPlaca(v.getPlaca()) == null) {
             vehiculos.add(v);
         }
     }
@@ -99,7 +99,7 @@ public class Usuario {
     //  retorna true si se eliminó correctamente, false en caso contrario
     public boolean borrarVehiculo(String placa) {
         Vehiculo v = buscarVehiculoPorPlaca(placa);
-        if (v != null && v.getId_usuario() == this.id_usuario) {
+        if (v != null && v.getId_usuario() == this.documento) {
             vehiculos.remove(v);
             return true;
         }
@@ -120,7 +120,7 @@ public class Usuario {
     //Metodo toString para mostrar informacion del usuario en formato legible
     @Override
     public String toString() {
-        return "Usuario #" + id_usuario + " | Nombre: " + nombre + " | Rol: " + rol + " | Fecha de creacion: " + fecha_creacion;
+        return "Usuario #" + documento + " | Nombre: " + nombre + " | Rol: " + rol + " | Fecha de creacion: " + fecha_creacion;
     }
 }
 

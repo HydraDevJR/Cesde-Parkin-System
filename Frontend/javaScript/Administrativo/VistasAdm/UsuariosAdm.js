@@ -10,11 +10,28 @@ let rol = document.getElementById("rol");
 Crear.addEventListener("click", () => {
     if (cedula.value != "" && nombre.value != "" && correo.value != "" && contrasena.value != "" && rol.value != "") {
         const Usuarios = JSON.parse(localStorage.getItem("Usuarios")) || [];
+        
+        // Validar si la cédula ya existe
+        const existeCedula = Usuarios.some(usuario => usuario.cedula === cedula.value);
+        if (existeCedula) {
+            alert("Ya existe un usuario con esta cédula");
+            return;
+        }
+
+        // Validar si el correo ya existe
+        const existeCorreo = Usuarios.some(usuario => usuario.correo === correo.value);
+        if (existeCorreo) {
+            alert("Ya existe un usuario con este correo electrónico");
+            return;
+        }
+
+        // Si no hay duplicados, crear el usuario
         Usuarios.push({cedula: cedula.value, nombre: nombre.value, correo: correo.value, contrasena: contrasena.value, rol: rol.value});
         localStorage.setItem("Usuarios", JSON.stringify(Usuarios));
 
         agregarUsuario(cedula.value, nombre.value, correo.value, rol.value);
 
+        // Limpiar campos después de crear el usuario
         cedula.value = "";
         nombre.value = "";
         correo.value = "";

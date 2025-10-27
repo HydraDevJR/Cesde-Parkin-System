@@ -13,6 +13,7 @@ repositories {
 dependencies {
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.slf4j:slf4j-simple:2.0.9'
+    implementation 'com.microsoft.sqlserver:mssql-jdbc:12.4.1.jre11'
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

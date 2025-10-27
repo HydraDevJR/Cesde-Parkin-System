@@ -70,11 +70,11 @@ goto fail
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\Backend-1.0-SNAPSHOT.jar;%APP_HOME%\lib\slf4j-simple-2.0.9.jar;%APP_HOME%\lib\mysql-connector-j-8.0.33.jar;%APP_HOME%\lib\slf4j-api-2.0.9.jar;%APP_HOME%\lib\protobuf-java-3.21.9.jar
+set CLASSPATH=%APP_HOME%\lib\Backend-1.0-SNAPSHOT.jar;%APP_HOME%\lib\slf4j-simple-2.0.9.jar;%APP_HOME%\lib\mssql-jdbc-12.4.1.jre11.jar;%APP_HOME%\lib\mysql-connector-j-8.0.33.jar;%APP_HOME%\lib\slf4j-api-2.0.9.jar;%APP_HOME%\lib\protobuf-java-3.21.9.jar
 
 
 @rem Execute Backend
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %BACKEND_OPTS%  -classpath "%CLASSPATH%" com.cesde.model.CesdePS %*
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %BACKEND_OPTS%  -classpath "%CLASSPATH%" com.main.model.CesdePS %*
 
 :end
 @rem End local scope for the variables with windows NT shell

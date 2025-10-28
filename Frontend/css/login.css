@@ -29,7 +29,7 @@ body{
         justify-content: center;
         align-items: center;
     }
-    .login{
+    #login{
         width: 35%;
         height: 450px;
         display: flex;
@@ -39,6 +39,7 @@ body{
         background-color: var(--gris-claro);
         border-radius: 5px;
         box-shadow: 0px 0px 5px var(--gris-oscuro);
+        transition: box-shadow 0.5s ease-in-out, transform 0.8s ease-in-out;
     }
     .imglogin{
         width: 100%;
@@ -79,7 +80,7 @@ body{
         box-shadow: 1px 1px 10px #3399ff;
         transform: scale(1.03);
     }
-    section .login #inputs input{
+    section #login #inputs input{
         background-color: var(--blanco);
         width: 70%;
         height: 100%;

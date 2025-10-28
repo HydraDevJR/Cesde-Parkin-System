@@ -31,8 +31,8 @@
                     <ul class="lista">
                         <li class="item"><a href="/Frontend/html/Administrativo/administrativo.html" class="link">Principal</a></li>
                         <li class="item"><a href="#" class="link">Vehiculos</a></li>
-                        <li class="item"><a href="#" class="link">Parqueadero</a></li>
-                        <li class="item"><a href="/Frontend/html/index.html" class="link">Cerrar Sesion</a></li>
+                        <li class="item"><a href="/Frontend/html/Administrativo/VistasAdm/ParqueaderoAdm.html" class="link">Parqueadero</a></li>
+                        <li class="item" id="cerrarSesion"><a>Cerrar Sesion</a></li>
                     </ul>
                 </nav>
             </div>
@@ -40,7 +40,7 @@
     <main>
         <section id="agregarUsuario">
             <h3 id="titulo">Nuevo Usuario</h3>
-                <form class="datosUsuario">
+                <form id="datosUsuario">
                         <div class="input-group">
                             
                             <input type="text" id="cedula" name="cedula" placeholder="Cedula">
@@ -58,7 +58,13 @@
                             <input type="text" id="contrasena" name="contrasena" placeholder="Contraseña">
                         </div>
                         <div class="input-group">
-                            <select id="rol" name="rol">
+                            <select id="estado" name="estado" aria-placeholder="Estado" style="display: none;">
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <select id="rol" name="rol" aria-placeholder="Rol">
                                 <option value="Administrador">Administrador</option>
                                 <option value="Estudiante">Estudiante</option>
                             </select>
@@ -67,7 +73,10 @@
                     </form>
         </section>
         <section id="Usuarios">
-            <h3 id="titulo">Lista de Usuarios</h3>
+            <div id="mensajes">
+                <h3>Lista de Usuarios</h3>
+                <div id="mensaje"></div>
+            </div>
             <div class="listaUsuarios">
                 <table class="tabla-encabezados">
                     <thead>
@@ -80,9 +89,10 @@
                             <th>Acciones</th>
                         </tr>
                     </thead>
+                    <tbody id="tbodyUsuarios">
+                        <!-- Aquí se insertarán las filas -->
+                    </tbody>
                 </table>
-                <div id="mostrarUsuarios">
-
                 </div>
             </div>
         </section>

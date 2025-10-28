@@ -114,7 +114,7 @@ case "$( uname )" in                #(
   NONSTOP* )        nonstop=true ;;
 esac
 
-CLASSPATH=$APP_HOME/lib/Backend-1.0-SNAPSHOT.jar:$APP_HOME/lib/slf4j-simple-2.0.9.jar:$APP_HOME/lib/mysql-connector-j-8.0.33.jar:$APP_HOME/lib/slf4j-api-2.0.9.jar:$APP_HOME/lib/protobuf-java-3.21.9.jar
+CLASSPATH=$APP_HOME/lib/Backend-1.0-SNAPSHOT.jar:$APP_HOME/lib/mssql-jdbc-13.2.1.jre11.jar:$APP_HOME/lib/slf4j-simple-2.0.9.jar:$APP_HOME/lib/slf4j-api-2.0.9.jar
 
 
 # Determine the Java command to use to start the JVM.
@@ -202,7 +202,7 @@ fi
 
 
 # Add default JVM options here. You can also use JAVA_OPTS and BACKEND_OPTS to pass JVM options to this script.
-DEFAULT_JVM_OPTS=""
+DEFAULT_JVM_OPTS='"--enable-native-access=ALL-UNNAMED"'
 
 # Collect all arguments for the java command:
 #   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
@@ -212,7 +212,7 @@ DEFAULT_JVM_OPTS=""
 
 set -- \
         -classpath "$CLASSPATH" \
-        com.cesde.model.CesdePS \
+        com.cesde.main.model.CesdePS \
         "$@"
 
 # Stop when "xargs" is not available.

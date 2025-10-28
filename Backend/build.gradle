@@ -8,17 +8,19 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url 'https://maven.microsoft.com/maven2' } // 🔹 Repositorio oficial de Microsoft
 }
 
 dependencies {
-    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation files('libs/mssql-jdbc-13.2.1.jre11.jar')
     implementation 'org.slf4j:slf4j-simple:2.0.9'
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 application {
-    mainClass = 'com.main.model.CesdePS'
+    mainClass = 'com.cesde.main.model.CesdePS'
+    applicationDefaultJvmArgs = ['--enable-native-access=ALL-UNNAMED']
 }
 
 run {

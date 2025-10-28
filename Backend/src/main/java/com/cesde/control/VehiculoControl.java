@@ -256,7 +256,7 @@ public class VehiculoControl {
         char ultimoChar = placa.charAt(placa.length() - 1);
         String tipo = Character.isLetter(ultimoChar) ? "Moto" : "Carro";
 
-        Vehiculo v = new Vehiculo(placa, tipo, est.getId_usuario());
+        Vehiculo v = new Vehiculo(placa, tipo, est.getDocumento());
         vehiculos.add(v);
         est.agregarVehiculo(v);
 

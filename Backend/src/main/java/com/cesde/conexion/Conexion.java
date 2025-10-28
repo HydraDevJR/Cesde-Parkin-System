@@ -5,20 +5,23 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Conexion {
-    private static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=CesdeParking;encrypt=false";
-    private static final String USER = "sa"; // o el usuario que tengas configurado
-    private static final String PASSWORD = "tu_contraseña";
-
+    // ✅ Forma recomendada: usar puerto y doble barra normal
+    private static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=CESDE_Parking_System;encrypt=false;trustServerCertificate=true;integratedSecurity=true;";
     private static Connection conexion = null;
 
     public static Connection getConexion() {
         try {
+            // ✅ Registrar el driver explícitamente
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
             if (conexion == null || conexion.isClosed()) {
-                conexion = DriverManager.getConnection(URL, USER, PASSWORD);
-                System.out.println("Conexión exitosa con SQL Server");
+                conexion = DriverManager.getConnection(URL);
+                System.out.println("Conexion exitosa con SQL Server");
             }
+        } catch (ClassNotFoundException e) {
+            System.out.println("❌ Driver SQL Server no encontrado: " + e.getMessage());
         } catch (SQLException e) {
-            System.out.println("Error al conectar con la base de datos: " + e.getMessage());
+            System.out.println("❌ Error al conectar con la base de datos: " + e.getMessage());
         }
         return conexion;
     }
@@ -27,10 +30,10 @@ public class Conexion {
         try {
             if (conexion != null && !conexion.isClosed()) {
                 conexion.close();
-                System.out.println("Conexión cerrada");
+                System.out.println("🔒 Conexión cerrada");
             }
         } catch (SQLException e) {
-            System.out.println("Error al cerrar conexión: " + e.getMessage());
+            System.out.println("❌ Error al cerrar conexión: " + e.getMessage());
         }
     }
 }

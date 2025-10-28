@@ -10,8 +10,8 @@ public class Estudiante extends Usuario {
     private String carrera;
     private final ArrayList<Vehiculo> listaVehiculos; // <-- lista de vehículos del estudiante
 
-    public Estudiante(int id_usuario, String nombre, String correo, String contrasena, String carrera) {
-        super(id_usuario, nombre, correo, contrasena, "ESTUDIANTE");
+    public Estudiante(int id_usuario, String nombre, String correo, String contrasena,String estado, String carrera) {
+        super(id_usuario, nombre, correo, contrasena, "ESTUDIANTE", estado);
         this.carrera = carrera;
         this.listaVehiculos = new ArrayList<>(); // inicializar lista
     }

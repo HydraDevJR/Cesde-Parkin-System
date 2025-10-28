@@ -13,11 +13,12 @@ public class Usuario {
     private String correo;
     private String contrasena;
     private String rol;
+    private String estado;
     private LocalDateTime fecha_creacion;
     private final ArrayList<Vehiculo> vehiculos;
 
     //Constructor para crear un usuario con fecha de creación automática
-    public Usuario(int id_Usuario, String nombre, String correo, String contrasena, String rol) {
+    public Usuario(int id_Usuario, String nombre, String correo, String contrasena, String rol, String estado) {
         this.documento = id_Usuario;
         this.nombre = nombre;
         this.correo = correo;
@@ -27,12 +28,13 @@ public class Usuario {
         this.vehiculos = new ArrayList<>();
     }
 
+
     //Getters y Setters de los atributos
-    public int getId_usuario() {
+    public int getDocumento() {
         return documento;
     }
 
-    public void setId_usuario(int id_usuario) {
+    public void setDocumento(int id_usuario) {
         this.documento = id_usuario;
     }
 
@@ -66,6 +68,14 @@ public class Usuario {
 
     public void setRol(String rol) {
         this.rol = rol;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     public LocalDateTime getFecha_creacion() {

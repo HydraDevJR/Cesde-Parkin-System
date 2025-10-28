@@ -1,6 +1,7 @@
 package com.cesde.main;
 
 import com.cesde.conexion.Conexion;
+import com.cesde.server.Servidor;
 import com.cesde.control.*;
 import com.cesde.model.parqueadero.Parqueadero;
 
@@ -17,7 +18,6 @@ public class CesdePS {
         // Inicia el sistema desde Login
 //        Login login = new Login(uControl, pControl, vControl, oControl);
 //        login.iniciarSesion();
-
-        Conexion.getConexion();
+        new Thread(Servidor::iniciarServidor).start();
     }
 }

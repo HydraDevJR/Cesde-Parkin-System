@@ -1,10 +1,13 @@
 package com.cesde.control;
 
+import com.cesde.dao.VehiculoDAO;
 import com.cesde.model.usuarios.Estudiante;
 import com.cesde.model.usuarios.Usuario;
 import com.cesde.model.vehiculos.Vehiculo;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class VehiculoControl {
@@ -12,14 +15,23 @@ public class VehiculoControl {
     final ArrayList<Vehiculo> vehiculos;
     private final Scanner read;
     private final UsuarioControl uControl; // Para validar usuarios
+    private final VehiculoDAO dao;         // Nuevo: DAO para persistencia
 
     public VehiculoControl(UsuarioControl uControl) {
         this.vehiculos = new ArrayList<>();
         this.read = new Scanner(System.in);
         this.uControl = uControl;
+        this.dao = new VehiculoDAO();
+        cargarVehiculosDesdeDB(); // Inicializa la lista global con lo que hay en la DB
     }
 
-    //Menu para estudiantes
+    // ====================== Cargar vehículos desde BD ======================
+    private void cargarVehiculosDesdeDB() {
+        List<Vehiculo> lista = dao.listarVehiculos();
+        if (lista != null) {
+            vehiculos.addAll(lista);
+        }
+    }
     public void menuVehiculo(Estudiante est) {
         int opcion;
         do {
@@ -42,8 +54,6 @@ public class VehiculoControl {
             }
         } while (opcion != 5);
     }
-
-    //Menu para administradores
     public void menuVehiculoAdmin() {
         int opcion;
         do {
@@ -67,17 +77,96 @@ public class VehiculoControl {
         } while (opcion != 5);
     }
 
-    //    Los siguientes metodos van dirigidos a estudiantes
-    //Registrar vehiculos
-    private void registrarVehiculo(Estudiante est) {
-        String placa = leerDatosVehiculo();
-        if (placa == null) return;
+    // ====================== Métodos CRUD ======================
+
+    // Actualizamos guardarVehiculo para persistir en BD y aceptar los nuevos campos
+    private void guardarVehiculo(String placa, Estudiante est) {
+        char ultimoChar = placa.charAt(placa.length() - 1);
+        String tipo = Character.isLetter(ultimoChar) ? "Moto" : "Carro";
+
+        System.out.print("Ingrese marca del vehículo: ");
+        String marca = read.next();
+
+        System.out.print("Ingrese modelo del vehículo: ");
+        String modelo = read.next();
+
+        System.out.print("Ingrese color del vehículo: ");
+        String color = read.next();
+
+        LocalDateTime fechaRegistro = LocalDateTime.now();
+
+        Vehiculo v = new Vehiculo(placa, tipo, marca, modelo, color, est.getDocumento(), fechaRegistro);
+
+        // Guardar en DAO (base de datos)
+        boolean ok = dao.insertarVehiculo(v);
+        if (ok) {
+            vehiculos.add(v);      // lista global
+            est.agregarVehiculo(v); // lista estudiante
+            System.out.println("Vehículo registrado correctamente para " + est.getNombre());
+        } else {
+            System.out.println("Error al registrar vehículo en la base de datos.");
+        }
+    }
+    // Registrar vehículo para estudiante usando DAO
+    public void registrarVehiculo(Estudiante est) {
+        System.out.print("Ingrese placa del vehículo: ");
+        String placa = read.next();
+        if (placa == null || placa.isEmpty()) {
+            System.out.println("Placa no válida.");
+            return;
+        }
+
+        // Llamamos a guardarVehiculo, que persiste en BD
+        guardarVehiculo(placa, est);
+    }
+
+    // Listar vehículos del estudiante usando DAO
+    public void listarVehiculos(Estudiante est) {
+        // Obtenemos desde DAO solo los vehículos de ese estudiante
+        List<Vehiculo> lista = dao.listarPorUsuario(est.getDocumento());
+        if (lista.isEmpty()) {
+            System.out.println("No tienes vehículos registrados.");
+            return;
+        }
+
+        System.out.println("\n--- Mis Vehículos ---");
+        for (Vehiculo v : lista) {
+            System.out.println(v);
+        }
+    }
+    // Registrar vehículo para administrador usando DAO
+    public void registrarVehiculoAdmin() {
+        Estudiante est = obtenerPropietario();
+        if (est == null) {
+            System.out.println("Error: usuario no registrado o no es estudiante.");
+            return;
+        }
+
+        System.out.print("Ingrese placa del vehículo: ");
+        String placa = read.next();
+        if (placa == null || placa.isEmpty()) {
+            System.out.println("Placa no válida.");
+            return;
+        }
 
         guardarVehiculo(placa, est);
     }
 
-    //Para modificar vehiculos
-    // Actualiza el tipo de vehiculo asociado a la placa ingresada
+    // Listar todos los vehículos usando DAO
+    public void listarVehiculosAdmin() {
+        List<Vehiculo> lista = dao.listarVehiculos(); // Todos los vehículos en BD
+        if (lista.isEmpty()) {
+            System.out.println("No hay vehículos registrados.");
+            return;
+        }
+
+        System.out.println("\n--- Lista de Vehículos ---");
+        for (Vehiculo v : lista) {
+            System.out.println(v);
+        }
+    }
+
+    // Modificar vehículo para estudiantes
     private void modificarVehiculo(Estudiante est) {
         System.out.print("Ingrese la placa del vehículo a modificar: ");
         String placa = read.next();
@@ -90,59 +179,26 @@ public class VehiculoControl {
 
         System.out.print("Nuevo tipo de vehículo: ");
         vehiculo.setTipo(read.next());
-        System.out.println("Vehículo modificado con éxito.");
-    }
 
-    // Elimina un vehículo pero valida que esté asociado al estudiante actual
-    private void eliminarVehiculo(Estudiante est) {
-        System.out.print("Ingrese la placa del vehículo a eliminar: ");
-        String placa = read.next();
+        System.out.print("Nueva marca: ");
+        vehiculo.setMarca(read.next());
 
-        // Busca el vehículo en la lista del estudiante
-        Vehiculo vehiculo = buscarVehiculoEstudiante(est, placa);
+        System.out.print("Nuevo modelo: ");
+        vehiculo.setModelo(read.next());
 
-        if (vehiculo == null) {
-            System.out.println("Error: no tienes registrado un vehículo con esa placa.");
-            return;
-        }
+        System.out.print("Nuevo color: ");
+        vehiculo.setColor(read.next());
 
-        // Eliminar de la lista del estudiante
-        est.getListaVehiculos().remove(vehiculo);
-
-        // Eliminar de la lista global
-        vehiculos.remove(vehiculo);
-
-        System.out.println("Vehículo eliminado correctamente.");
-    }
-
-    //Lista de vehiculos para estudiantes
-    private void listarVehiculos(Estudiante est) {
-        if (est.getVehiculos() == 0) {
-            System.out.println("No tienes vehículos registrados.");
+        // Actualizar en DAO
+        boolean ok = dao.actualizarVehiculo(vehiculo, vehiculo.getPlaca());
+        if (ok) {
+            System.out.println("Vehículo modificado con éxito.");
         } else {
-            System.out.println("\n--- Mis Vehículos ---");
-            for (Vehiculo v : est.getListaVehiculos()) {
-                System.out.println(v);
-            }
+            System.out.println("Error al actualizar vehículo en la base de datos.");
         }
     }
 
-    // Dejando de lado los metodos para estudiantes, los siguientes son par administradores
-
-    //Registrar vehiculo para administrador
-    private void registrarVehiculoAdmin() {
-        Estudiante est = obtenerPropietario(); // Paso 1: validar estudiante
-        if (est != null) {
-            String placa = leerDatosVehiculo(); // Paso 2: pedir placa
-            if (placa == null) return;
-            guardarVehiculo(placa, est);       // Paso 3: guardar
-        } else {
-            System.out.println("Error: el usuario no existe o no es un estudiante. Primero debe registrarlo.");
-        }
-    }
-
-    //Modificar vehiculos
-    // Actualiza el tipo de vehiculo asociado a la placa ingresada
+    // Modificar vehículo para admin
     private void modificarVehiculoAdmin() {
         System.out.print("Ingrese la placa del vehículo a modificar: ");
         String placa = read.next();
@@ -155,50 +211,72 @@ public class VehiculoControl {
 
         System.out.print("Nuevo tipo de vehículo: ");
         vehiculo.setTipo(read.next());
-        System.out.println("Vehículo modificado con éxito.");
+
+        System.out.print("Nueva marca: ");
+        vehiculo.setMarca(read.next());
+
+        System.out.print("Nuevo modelo: ");
+        vehiculo.setModelo(read.next());
+
+        System.out.print("Nuevo color: ");
+        vehiculo.setColor(read.next());
+
+        boolean ok = dao.actualizarVehiculo(vehiculo, vehiculo.getPlaca());
+        if (ok) {
+            System.out.println("Vehículo modificado con éxito.");
+        } else {
+            System.out.println("Error al actualizar vehículo en la base de datos.");
+        }
     }
 
-    // Elimina el vehiculo tanto de la lista global como de la lista del estudiante propietario
+    // Eliminar vehículo para estudiantes
+    private void eliminarVehiculo(Estudiante est) {
+        System.out.print("Ingrese la placa del vehículo a eliminar: ");
+        String placa = read.next();
+
+        Vehiculo vehiculo = buscarVehiculoEstudiante(est, placa);
+
+        if (vehiculo == null) {
+            System.out.println("Error: no tienes registrado un vehículo con esa placa.");
+            return;
+        }
+
+        boolean ok = dao.eliminarVehiculo(placa);
+        if (ok) {
+            est.getListaVehiculos().remove(vehiculo);
+            vehiculos.remove(vehiculo);
+            System.out.println("Vehículo eliminado correctamente.");
+        } else {
+            System.out.println("Error al eliminar vehículo de la base de datos.");
+        }
+    }
+
+    // Eliminar vehículo para admin
     private void eliminarVehiculoAdmin() {
         System.out.print("Ingrese la placa del vehículo a eliminar: ");
         String placa = read.next();
 
         Vehiculo vehiculo = buscarVehiculoPorPlaca(placa);
-
         if (vehiculo == null) {
             System.out.println("Vehículo no encontrado.");
             return;
         }
 
-        // Eliminar de la lista global
-        vehiculos.removeIf(v -> v.getPlaca().equalsIgnoreCase(placa));
-
-        // Eliminar de la lista del estudiante
-        Usuario propietario = uControl.buscarUsuarioPorId(vehiculo.getId_usuario());
-        if (propietario instanceof Estudiante est) {
-            est.borrarVehiculo(vehiculo.getPlaca());
-        }
-
-        System.out.println("Vehículo eliminado correctamente.");
-    }
-
-    //Lista todos los vehiculos
-    // Recorre y muestra en pantalla la lista de vehiculos disponibles
-    private void listarVehiculosAdmin() {
-        if (vehiculos.isEmpty()) {
-            System.out.println("No hay vehículos registrados.");
-        } else {
-            System.out.println("\n--- Lista de Vehículos ---");
-            for (Vehiculo v : vehiculos) {
-                System.out.println(v);
+        boolean ok = dao.eliminarVehiculo(placa);
+        if (ok) {
+            // eliminar de lista global
+            vehiculos.remove(vehiculo);
+            Usuario propietario = uControl.buscarUsuarioPorId(vehiculo.getDocumento());
+            if (propietario instanceof Estudiante est) {
+                est.borrarVehiculo(placa);
             }
+            System.out.println("Vehículo eliminado correctamente.");
+        } else {
+            System.out.println("Error al eliminar vehículo de la base de datos.");
         }
     }
 
-    // Los siguientes metodos son para busqueda
-
-    // Metodo de búsqueda global en la lista de vehiculos
-    //  retorna el vehiculo si existe, de lo contrario null
+    // ====================== Métodos de búsqueda ======================
     public Vehiculo buscarVehiculoPorPlaca(String placa) {
         for (Vehiculo v : vehiculos) {
             if (v.getPlaca().equalsIgnoreCase(placa)) {
@@ -208,7 +286,6 @@ public class VehiculoControl {
         return null;
     }
 
-    //Igual que el metodo anterior pero para estudiantes
     private Vehiculo buscarVehiculoEstudiante(Estudiante est, String placa) {
         for (Vehiculo v : est.getListaVehiculos()) {
             if (v.getPlaca().equalsIgnoreCase(placa)) {
@@ -218,10 +295,7 @@ public class VehiculoControl {
         return null;
     }
 
-    //Los siguientes metodos están enfocados en el registro de vehiculos
-
-    //Metodo para recibir los datos de un vehiculo (placa) con validacion
-    //  para que el campo no sea nulo ni este vacio
+    // ====================== Métodos de entrada ======================
     private String leerDatosVehiculo() {
         System.out.print("Ingrese la placa del vehículo: ");
         String placa = read.next();
@@ -237,7 +311,6 @@ public class VehiculoControl {
         return leerDatosVehiculo();
     }
 
-    //Metodo para validar existencia del usuario
     private Estudiante obtenerPropietario() {
         System.out.print("Ingrese el ID del propietario (estudiante): ");
         int idProp = read.nextInt();
@@ -247,19 +320,5 @@ public class VehiculoControl {
             return est;
         }
         return null;
-    }
-
-    //Metodo para guardar los datos del vehiculo previamente validados
-    //  y tambien define el tipo de vehiculo acorde al numero de placa
-    //  si termina en letra es Moto, si no es Carro
-    private void guardarVehiculo(String placa, Estudiante est) {
-        char ultimoChar = placa.charAt(placa.length() - 1);
-        String tipo = Character.isLetter(ultimoChar) ? "Moto" : "Carro";
-
-        Vehiculo v = new Vehiculo(placa, tipo, est.getDocumento());
-        vehiculos.add(v);
-        est.agregarVehiculo(v);
-
-        System.out.println("Vehículo registrado correctamente para " + est.getNombre());
     }
 }

@@ -1,20 +1,30 @@
 package com.cesde.model.vehiculos;
 
+import java.time.LocalDateTime;
+
 public class Vehiculo {
 
-    //Atributos principales de la clase Vehiculo
     private String placa;
     private String tipo;
-    private int documento;
+    private String marca;
+    private String modelo;
+    private String color;
+    private int documento; // id del propietario
+    private LocalDateTime fechaRegistro;
 
-    //Constructor para crear un vehiculo con su placa, tipo y el id del propietario
-    public Vehiculo(String placa, String tipo, int id_usuario) {
+    // Constructor completo
+    public Vehiculo(String placa, String tipo, String marca, String modelo, String color, int documento, LocalDateTime fechaRegistro) {
         this.placa = placa;
         this.tipo = tipo;
-        this.documento = id_usuario;
+        this.marca = marca;
+        this.modelo = modelo;
+        this.color = color;
+        this.documento = documento;
+        this.fechaRegistro = fechaRegistro;
     }
 
-    //Getters y Setters de los atributos
+    // ================== Getters y Setters ==================
+
     public String getPlaca() {
         return placa;
     }
@@ -31,17 +41,56 @@ public class Vehiculo {
         this.tipo = tipo;
     }
 
-    public int getId_usuario() {
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public String getModelo() {
+        return modelo;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public int getDocumento() {
         return documento;
     }
 
-    public void setId_usuario(int id_usuario) {
-        this.documento = id_usuario;
+    public void setDocumento(int documento) {
+        this.documento = documento;
     }
 
-    //Metodo toString para mostrar informacion del vehiculo en formato legible
+    public LocalDateTime getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+    }
+
+    // ================== toString ==================
+
     @Override
     public String toString() {
-        return "Placa: " + placa + " | Tipo: " + tipo + " | Documento del propietario: " + documento;
+        return "Placa: " + placa +
+                " | Tipo: " + tipo +
+                " | Marca: " + marca +
+                " | Modelo: " + modelo +
+                " | Color: " + color +
+                " | Documento propietario: " + documento +
+                " | Fecha registro: " + fechaRegistro;
     }
 }

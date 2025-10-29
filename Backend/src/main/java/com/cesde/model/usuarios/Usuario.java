@@ -24,6 +24,7 @@ public class Usuario {
         this.correo = correo;
         this.contrasena = contrasena;
         this.rol = rol;
+        this.estado = estado;
         this.fecha_creacion = LocalDateTime.now(); // asigna automáticamente la fecha y hora actual
         this.vehiculos = new ArrayList<>();
     }
@@ -90,7 +91,7 @@ public class Usuario {
     public int getVehiculos() {
         int contador = 0;
         for (Vehiculo v : vehiculos) {
-            if (v.getId_usuario() == this.documento) {
+            if (v.getDocumento() == this.documento) {
                 contador++;
             }
         }
@@ -100,7 +101,7 @@ public class Usuario {
     //Metodo para agregar un vehiculo al usuario
     //  solo si el vehiculo pertenece a este usuario y no existe previamente
     public void agregarVehiculo(Vehiculo v) {
-        if (v.getId_usuario() == this.documento && buscarVehiculoPorPlaca(v.getPlaca()) == null) {
+        if (v.getDocumento() == this.documento && buscarVehiculoPorPlaca(v.getPlaca()) == null) {
             vehiculos.add(v);
         }
     }
@@ -109,7 +110,7 @@ public class Usuario {
     //  retorna true si se eliminó correctamente, false en caso contrario
     public boolean borrarVehiculo(String placa) {
         Vehiculo v = buscarVehiculoPorPlaca(placa);
-        if (v != null && v.getId_usuario() == this.documento) {
+        if (v != null && v.getDocumento() == this.documento) {
             vehiculos.remove(v);
             return true;
         }

@@ -34,22 +34,6 @@ public class UsuarioDAO {
         }
     }
 
-    // Verifica si existe otro usuario con el mismo documento
-    public boolean existeDocumentoExcluyendo(int documento, int idActual) {
-        String sql = "SELECT 1 FROM Usuarios WHERE documento = ? AND documento <> ?";
-        try (Connection con = Conexion.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setInt(1, documento);
-            ps.setInt(2, idActual);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
     // Verifica si existe otro usuario con el mismo correo, excluyendo al usuario actual
     public boolean existeCorreoExcluyendo(String correo, int idActual) {
         String sql = "SELECT 1 FROM Usuarios WHERE correo = ? AND documento <> ?";

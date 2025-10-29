@@ -4,7 +4,7 @@ import com.cesde.model.usuarios.Estudiante;
 import com.cesde.model.usuarios.Usuario;
 
 import java.util.Scanner;
-//La clase Login maneja toda l
+//Esta solo se usa bajo consola
 public class Login {
     private final UsuarioControl uControl;
     private final ParqueaderoControl pControl;

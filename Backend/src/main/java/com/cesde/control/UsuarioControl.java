@@ -155,7 +155,7 @@ public class UsuarioControl {
             String estado = read.nextLine();
             if (!estado.isBlank()) usuario.setEstado(estado);
 
-            boolean actualizado = usuarioDAO.actualizarUsuario(usuario);
+            boolean actualizado = usuarioDAO.actualizarUsuario(usuario, usuario.getDocumento());
             if (actualizado)
                 System.out.println("Usuario actualizado correctamente.");
             else
@@ -215,7 +215,7 @@ public class UsuarioControl {
             String contrasena = read.nextLine();
             if (!contrasena.isBlank()) e.setContrasena(contrasena);
 
-            boolean actualizado = usuarioDAO.actualizarUsuario(e);
+            boolean actualizado = usuarioDAO.actualizarUsuario(e, e.getDocumento());
             if (actualizado)
                 System.out.println("Perfil actualizado correctamente.");
             else

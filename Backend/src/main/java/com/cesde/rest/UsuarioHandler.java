@@ -2,7 +2,11 @@ package com.cesde.rest;
 
 import com.cesde.dao.UsuarioDAO;
 import com.cesde.model.usuarios.Usuario;
-import com.google.gson.Gson;
+import com.google.gson.*;
+
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -18,7 +22,12 @@ import java.util.List;
 public class UsuarioHandler implements HttpHandler {
 
     private final UsuarioDAO dao = new UsuarioDAO();
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>)
+                    (src, typeOfSrc, context) -> new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>)
+                    (json, typeOfT, context) -> LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            .create();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -91,34 +100,66 @@ public class UsuarioHandler implements HttpHandler {
     }
 
     private void crearUsuario(HttpExchange exchange) throws IOException {
-        String body = new String(exchange.getRequestBody().readAllBytes());
+        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         Usuario nuevo = gson.fromJson(body, Usuario.class);
+
+        // Validar documento duplicado
+        if (dao.buscarPorDocumento(nuevo.getDocumento()) != null) {
+            sendResponse(exchange, 400, "Error: Documento ya registrado por otro usuario");
+            return;
+        }
+
+        // Validar correo duplicado
+        if (dao.validarLogin(nuevo.getCorreo(), nuevo.getContrasena()) != null ||
+                dao.existeCorreoEnBD(nuevo.getCorreo())) {
+            sendResponse(exchange, 400, "Error: Correo ya registrado por otro usuario");
+            return;
+        }
 
         boolean ok = dao.insertarUsuario(nuevo);
         if (ok)
-            sendResponse(exchange, 201, "✅ Usuario creado correctamente");
+            sendResponse(exchange, 201, "Usuario creado correctamente");
         else
-            sendResponse(exchange, 400, "❌ Error al crear usuario");
+            sendResponse(exchange, 400, "Error al crear usuario");
     }
 
     private void actualizarUsuario(HttpExchange exchange, int id) throws IOException {
-        String body = new String(exchange.getRequestBody().readAllBytes());
+        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         Usuario actualizado = gson.fromJson(body, Usuario.class);
-        actualizado.setDocumento(id);
+        System.out.println("Actualizando usuario con ID original: " + id);
+        System.out.println("Nuevo documento solicitado: " + actualizado.getDocumento());
 
-        boolean ok = dao.actualizarUsuario(actualizado);
-        if (ok)
-            sendResponse(exchange, 200, "✅ Usuario actualizado correctamente");
-        else
-            sendResponse(exchange, 400, "❌ Error al actualizar usuario");
+        // Si intenta cambiar el documento, validar que el nuevo no esté en uso
+        if (actualizado.getDocumento() != id) {
+            if (dao.buscarPorDocumento(actualizado.getDocumento()) != null) {
+                sendResponse(exchange, 400, "Error: El nuevo documento ya está registrado por otro usuario");
+                return;
+            }
+        }
+
+        // Validar correo duplicado (excluyendo al usuario actual)
+        if (dao.existeCorreoExcluyendo(actualizado.getCorreo(), id)) {
+            sendResponse(exchange, 400, "Error: Correo ya registrado por otro usuario");
+            return;
+        }
+
+        // Intentar actualizar con el documento original como referencia
+        boolean ok = dao.actualizarUsuario(actualizado, id);
+        if (ok) {
+            System.out.println("Usuario actualizado exitosamente");
+            sendResponse(exchange, 200, "Usuario actualizado correctamente");
+        } else {
+            System.out.println("Error al actualizar usuario");
+            sendResponse(exchange, 400, "Error: No se puede actualizar el documento, tiene vehículos asociados o hubo otro error");
+        }
     }
 
     private void eliminarUsuario(HttpExchange exchange, int id) throws IOException {
         boolean ok = dao.eliminarUsuario(id);
         if (ok)
-            sendResponse(exchange, 200, "🗑️ Usuario eliminado correctamente");
+            sendResponse(exchange, 200, "Usuario eliminado correctamente y sus vehiculos asociados");
         else
-            sendResponse(exchange, 404, "❌ Usuario no encontrado");
+            sendResponse(exchange, 404, "Usuario no encontrado");
     }
 
     // ====================== RESPUESTAS ====================== //

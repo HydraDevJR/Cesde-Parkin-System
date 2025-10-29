@@ -20,10 +20,57 @@ import java.util.List;
  */
 public class UsuarioDAO {
 
+    public boolean existeCorreoEnBD(String correo) {
+        String sql = "SELECT 1 FROM Usuarios WHERE correo = ?";
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, correo);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Verifica si existe otro usuario con el mismo documento
+    public boolean existeDocumentoExcluyendo(int documento, int idActual) {
+        String sql = "SELECT 1 FROM Usuarios WHERE documento = ? AND documento <> ?";
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, documento);
+            ps.setInt(2, idActual);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    // Verifica si existe otro usuario con el mismo correo, excluyendo al usuario actual
+    public boolean existeCorreoExcluyendo(String correo, int idActual) {
+        String sql = "SELECT 1 FROM Usuarios WHERE correo = ? AND documento <> ?";
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, correo);
+            ps.setInt(2, idActual);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // Listar todos los usuarios
     public List<Usuario> listarUsuarios() {
         List<Usuario> lista = new ArrayList<>();
-        String sql = "SELECT documento, nombre, correo, contrasena, rol, estado, fechaCreacion FROM Usuarios";
+        String sql = "SELECT documento, nombre, correo, contrasena, rol, estado FROM Usuarios";
 
         try (Connection con = Conexion.getConexion();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -67,41 +114,93 @@ public class UsuarioDAO {
         }
     }
 
+    public boolean tieneVehiculosAsociados(int documento) {
+        String sql = "SELECT 1 FROM Vehiculos WHERE documento = ? LIMIT 1";
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, documento);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // true si hay al menos un vehículo
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al verificar vehículos asociados: " + e.getMessage());
+            return false;
+        }
+    }
+
     // Actualizar usuario (por documento)
-    public boolean actualizarUsuario(Usuario u) {
-        String sql = "UPDATE Usuarios SET nombre = ?, correo = ?, contrasena = ?, rol = ?, estado = ? WHERE documento = ?";
+    public boolean actualizarUsuario(Usuario u, int documentoOriginal) {
+        System.out.println("=== DAO: Actualizando usuario ===");
+        System.out.println("Documento original: " + documentoOriginal);
+        System.out.println("Nuevo documento: " + u.getDocumento());
+
+        // Si intenta cambiar el documento, verificar que no tenga vehículos asociados
+        if (u.getDocumento() != documentoOriginal) {
+            if (tieneVehiculosAsociados(documentoOriginal)) {
+                System.out.println("No se puede cambiar el documento: hay vehículos asociados.");
+                return false;
+            }
+        }
+
+        String sql = "UPDATE Usuarios SET nombre = ?, correo = ?, contrasena = ?, rol = ?, estado = ?, documento = ? WHERE documento = ?";
         try (Connection con = Conexion.getConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, u.getNombre());
             ps.setString(2, u.getCorreo());
-            ps.setString(3, u.getContrasena()); // → si cambia contraseña, idealmente recibir hash
+            ps.setString(3, u.getContrasena());
             ps.setString(4, u.getRol());
             ps.setString(5, u.getEstado());
-            ps.setInt(6, u.getDocumento());
+            ps.setInt(6, u.getDocumento());      // Nuevo documento
+            ps.setInt(7, documentoOriginal);      // Documento actual (WHERE)
 
             int filas = ps.executeUpdate();
+            System.out.println("Filas actualizadas: " + filas);
             return filas > 0;
         } catch (SQLException e) {
             System.out.println("Error actualizarUsuario: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
     // Eliminar usuario por documento
     public boolean eliminarUsuario(int documento) {
-        String sql = "DELETE FROM Usuarios WHERE documento = ?";
-        try (Connection con = Conexion.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        String sqlEliminarVehiculos = "DELETE FROM Vehiculos WHERE documento = ?";
+        String sqlEliminarUsuario = "DELETE FROM Usuarios WHERE documento = ?";
 
-            ps.setInt(1, documento);
-            int filas = ps.executeUpdate();
-            return filas > 0;
+        try (Connection con = Conexion.getConexion()) {
+            // Desactivar autocommit para manejar transacción
+            con.setAutoCommit(false);
+
+            try (PreparedStatement psVeh = con.prepareStatement(sqlEliminarVehiculos);
+                 PreparedStatement psUsr = con.prepareStatement(sqlEliminarUsuario)) {
+
+                // Eliminar vehículos asociados
+                psVeh.setInt(1, documento);
+                psVeh.executeUpdate();
+
+                // Eliminar usuario
+                psUsr.setInt(1, documento);
+                int filas = psUsr.executeUpdate();
+
+                // Confirmar transacción
+                con.commit();
+
+                return filas > 0;
+            } catch (SQLException e) {
+                con.rollback(); // si algo falla, deshacer todo
+                System.out.println("Error eliminarUsuario: " + e.getMessage());
+                return false;
+            } finally {
+                con.setAutoCommit(true); // restaurar autocommit
+            }
         } catch (SQLException e) {
-            System.out.println("Error eliminarUsuario: " + e.getMessage());
+            System.out.println("Error en la conexión eliminarUsuario: " + e.getMessage());
             return false;
         }
     }
+
 
     // Buscar usuario por documento
     public Usuario buscarPorDocumento(int documento) {

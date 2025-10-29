@@ -232,6 +232,8 @@
 //     localStorage.removeItem("Parqueadero");
 //     window.location.href = "/Frontend/html/index.html";
 // });
+
+
 const API_URL = "http://localhost:8080/api/usuarios";
 
 let Crear = document.getElementById("btn-crearUsuario");
@@ -373,7 +375,7 @@ async function editarUsuario(documento) {
                 });
                 const text = await res.text();
                 mensaje.innerHTML = `<span style="color:${res.ok ? '#28a745' : '#e71d73'};">${text}</span>`;
-                if (res.ok) mostrarTablaUsuarios();
+                if (res.ok) mostrarTablaUsuarios(); limpiarFormulario();
             } catch (err) {
                 mensaje.innerHTML = `<span style="color:#e71d73;">Error: ${err.message}</span>`;
             } finally {
@@ -400,3 +402,18 @@ function limpiarFormulario() {
     rol.value = "";
     if (estado) estado.value = "";
 }
+
+verificarRol(["Administrador"]);
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Cerrar sesión directamente
+    const btnCerrarSesion = document.getElementById("cerrarSesion");
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener("click", function(e) {
+            e.preventDefault();
+            cerrarSesionDirecto(); // Función del auth.js
+        });
+        
+        btnCerrarSesion.style.cursor = "pointer";
+    }
+});
